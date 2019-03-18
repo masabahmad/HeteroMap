@@ -1,4 +1,4 @@
-SUBDIRS= examples
+SUBDIRS= examples predictors
 
 HET_DIR=$(PWD)
 
