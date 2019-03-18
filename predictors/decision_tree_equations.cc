@@ -82,8 +82,10 @@ int main(int argc, char** argv)
 
   //Input File handling
   FILE *file0 = NULL;
-  const char *filename = argv[1];
-  char c;
+  const int rows = atoi(argv[1]);
+  int line_counter = 0;
+  const char *filename = argv[2];
+  //char c;
   int lines_to_check = 0;
   char name[256] = {' '};
   file0 = fopen(filename,"r");
@@ -93,17 +95,18 @@ int main(int argc, char** argv)
   }
   
   //Input csv file read here
-  for(c=getc(file0); c!=EOF; c=getc(file0))
+  //for(c=getc(file0); c!=EOF; c=getc(file0))
+  //{
+  //  if(c=='\n')
+  //  {
+  //    lines_to_check++;
+  //  }
+  for(int i=0;i<rows;i++)
   {
-    if(c=='\n')
-    {
-      lines_to_check++;
-    }
-
-    //if(lines_to_check>1)
-    //{
-      //if(enable == 1)
-      //{
+        for(int j=0;j<256;j++)
+        {
+          name[j] = ' ';
+        }
         int f1 = fscanf(file0, "%[^,],%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
                              name,
                              &vertex_division, &pareto, &pareto_division, &push_pop, &reduction, 
@@ -127,8 +130,10 @@ int main(int argc, char** argv)
         //printf("\n %f %f", vertex_division, pareto);
       //}
     //}
-  }
+    line_counter++; lines_to_check = rows; lines_to_check++; 
+  //}
 
+  printf("\n \n");
   for(int i=0;i<30;i++)
   {
     printf("%c", name[i]);
@@ -136,6 +141,13 @@ int main(int argc, char** argv)
   printf("\n B and I Variables Read from File, Predicting......\n");
 
   //Decision Tree
+  //accelerator = 0 is a multicore, while 1 is a GPU
+  float deg = edges/vertices;
+  if(deg>1.0)
+    deg = 1.0;
+  if(deg<0)
+    deg = deg*-1;
+
   if(vertex_division>=0.5)
   {
     if(pareto>=0.5 || pareto_division>=0.5)
@@ -179,9 +191,16 @@ int main(int argc, char** argv)
         {
           if(local_comp>=0.5)
           {
-            if(edges/vertices>=0.5)
+            if(deg>=0.5)
             {
-              accelerator = 1;
+              if(diameter>=0.5)
+              {
+                accelerator = 0;
+              }
+              else  
+              {
+                accelerator = 1;
+              }
             }
             else
             {
@@ -200,7 +219,7 @@ int main(int argc, char** argv)
   {
     if(push_pop>=0.5)
     {
-      if((edges/vertices)>=0.5)
+      if(deg>=0.5)
       {
         accelerator = 0;
       }
@@ -257,7 +276,10 @@ int main(int argc, char** argv)
   printf("\n Now Calculating Intra-Accelerator M Variables......");
 
   float avg_deg = 0;
-  avg_deg = max_edges - (edges/vertices);
+  if(vertices == 0)
+    avg_deg = max_edges - (edges);
+  else
+    avg_deg = max_edges - (edges/vertices);
   if(avg_deg<0)
     avg_deg = avg_deg*-1.0;
   if(avg_deg>=1)
@@ -265,6 +287,9 @@ int main(int argc, char** argv)
   avg_deg = avg_deg * 10.0;
   avg_deg = ceil(avg_deg);
   avg_deg = avg_deg/10.0;
+  if(vertices==edges)
+    if(max_edges==1.0)
+      avg_deg = 1.0;
   printf("\n Avg_Deg: %f",avg_deg);
   
   float avg_deg_dia = (diameter + avg_deg)/2;
@@ -282,9 +307,14 @@ int main(int argc, char** argv)
   else
   {
     global_threads = (vertices*max_global_threads) + GPUMIN;
+    if(global_threads > max_global_threads)
+      global_threads = max_global_threads;
     local_threads = (avg_deg*max_local_threads) + GPUMIN;
-    printf("\n GPU Local Threads: %f, GPU Global Threads: %f", local_threads, global_threads);
-  } 
+    if(local_threads > max_local_threads)
+      local_threads = max_local_threads;
+    printf("\n GPU Local Threads: %f, \n GPU Global Threads: %f", local_threads, global_threads);
+  }
+ }//file rows 
 
   return 0;
 
