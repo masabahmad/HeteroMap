@@ -1,13 +1,13 @@
 SUBDIRS= examples
 
-CRONO_DIR=$(PWD)
+HET_DIR=$(PWD)
 
 all:
 	for dir in $(SUBDIRS); do \
-		$(MAKE) -C $(CRONO_DIR)/apps/$$dir; \
+		$(MAKE) -C $(HET_DIR)/$$dir; \
 	done
 
 clean:
 	for dir in $(SUBDIRS); do \
-		$(MAKE) clean -C $(CRONO_DIR)/apps/$$dir; \
+		$(MAKE) clean -C $(HET_DIR)/$$dir; \
 	done
