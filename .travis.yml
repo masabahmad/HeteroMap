@@ -8,7 +8,7 @@ install:
   - sudo apt-get install -y libz-dev
   - sudo apt-get install -y libpthread-stubs0-dev
 env:
-  - CRONO_HOME=$PWD BOOST_ROOT=/usr/include/boost
+  - HET_HOME=$PWD BOOST_ROOT=/usr/include/boost
 language: c++
 compiler:
   - g++
