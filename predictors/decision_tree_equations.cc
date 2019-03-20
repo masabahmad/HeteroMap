@@ -1,22 +1,28 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <string.h>
+
+#include <time.h>
+#include <sys/timeb.h>
+
+#define BILLION 1E9
+
 
 //Multicore Specification Defines
 #define CORESMIN 2
 #define MTMIN 1
 #define BLOCKTIMEMIN 1
-#define PLACE1MIN 1
-#define PLACE2MIN 1
-#define PLACE3MIN 1
+#define OFFSETMIN 1
+#define KMP_AFFINITY_MIN 0
+#define SIMDMIN 1
 
 #define max_cores 61
 #define max_multithreading 4
 #define max_blocktime 1000
-#define max_thread_placement1 1
-#define max_thread_placement2 1
-#define max_thread_placement3 1
-
+#define max_thread_placement max_cores
+char affinity_type[10];
+#define max_simd 16
 
 //GPU Specification Defines
 #define GPUMIN 32
@@ -142,6 +148,11 @@ int main(int argc, char** argv)
 
   //Decision Tree
   //accelerator = 0 is a multicore, while 1 is a GPU
+  
+  //CPU Time
+   struct timespec requestStart, requestEnd;
+   clock_gettime(CLOCK_REALTIME, &requestStart);
+
   float deg = edges/vertices;
   if(deg>1.0)
     deg = 1.0;
@@ -297,23 +308,81 @@ int main(int argc, char** argv)
 
   if(accelerator==0.0)
   {
-    cores = (vertices*max_cores) + CORESMIN;
-    multithreading = (avg_deg*max_multithreading) + MTMIN;
-    kmp_blocktime = ((contention + barriers)/2)*max_blocktime + BLOCKTIMEMIN;
-    kmp_place_threads1 = (avg_deg_dia*max_thread_placement1) + PLACE1MIN;
-    kmp_place_threads2 = (avg_deg_dia*max_thread_placement2) + PLACE2MIN;
-    kmp_place_threads3 = (avg_deg_dia*max_thread_placement3) + PLACE3MIN;
+    printf("\n Predicted Multicore Accelerator values \n");
+    cores = (vertices*max_cores) + CORESMIN; //M2
+    if(cores>max_cores)
+      cores = max_cores;    
+    int coresint = cores;
+    printf("\n Cores: %d",coresint);
+
+    multithreading = (avg_deg*max_multithreading) + MTMIN; //M3
+    if(multithreading>max_multithreading)
+      multithreading = max_multithreading;
+    int multithreadingint = multithreading;
+    printf("\n Multithreading: %d",multithreadingint);
+
+    kmp_blocktime = ((contention + barriers)/2)*max_blocktime + BLOCKTIMEMIN; //M4
+    if(kmp_blocktime>max_blocktime)
+      kmp_blocktime = max_blocktime;
+    int kmp_blocktimeint = kmp_blocktime;
+    printf("\n KMP_BLOCKTIME: %d",kmp_blocktimeint);
+
+    //KMP_PLACE_THREADS, 1=CORES, 2=THREADS, 3=OFFSET
+    kmp_place_threads1 = cores; //M5
+    kmp_place_threads2 = multithreading; //M6
+    kmp_place_threads3 = (avg_deg_dia*max_thread_placement) + OFFSETMIN; //M7
+    int offset = kmp_place_threads3;
+    printf("\n KMP_PLACE_THREADS: %d %d %d",coresint,multithreadingint,offset);
+
+    //For gcc, GOMP_CPU_AFFINITY may be used in lieu of KMP_AFFINITY
+    //However, GOMP_CPU_AFFINITY requires manual placement.
+    //granularity is always supposed to be fine 
+    //Regardless, compact/scatter may be used manually there by converting the predicted values.
+    char *to = affinity_type;
+    kmp_affinity = ((avg_deg_dia + read_write_shared)/2) + KMP_AFFINITY_MIN; //M8
+    if(kmp_affinity<0.3)
+      to = stpcpy(to, "compact"); //Disallow data movement between cores
+    else if(kmp_affinity>=0.3 && kmp_affinity<0.6)
+      to = stpcpy(to, "balanced");
+    else
+      to = stpcpy(to, "scatter"); //Low R/W shared data, allow data movement between cores
+    printf("\n THREAD AFFINITY: %s",affinity_type);
+
+    //OMP nowait enable/disable depends on local computation for local barriers in omp loops
+    omp_nowait = (floating_point + local_comp + barriers)/3;
+    if(omp_nowait<0.5)
+      omp_nowait = 0;
+    else
+      omp_nowait = 1;
+    int omp_nowaitint = omp_nowait;
+    printf("\n OMP_NOWAIT: %d, ENABLE:1, DISABLE:0",omp_nowaitint);
+    
+    //SIMD similar to multi-threading, depends on available density in inner edge loops
+    pragma_simd = (avg_deg*max_simd) + SIMDMIN; //M10
+    if(pragma_simd>max_simd)
+      pragma_simd = max_simd;
+    int pragma_simdint = pragma_simd;
+    printf("\n SIMD: %d",pragma_simdint);
+     
   }
   else
   {
     global_threads = (vertices*max_global_threads) + GPUMIN;
     if(global_threads > max_global_threads)
       global_threads = max_global_threads;
+
     local_threads = (avg_deg*max_local_threads) + GPUMIN;
     if(local_threads > max_local_threads)
       local_threads = max_local_threads;
-    printf("\n GPU Local Threads: %f, \n GPU Global Threads: %f", local_threads, global_threads);
+    int local_threadsint = local_threads;
+    int global_threadsint = global_threads;
+    printf("\n GPU Local Threads: %d, \n GPU Global Threads: %d", local_threadsint, global_threadsint);
   }
+
+  clock_gettime(CLOCK_REALTIME, &requestEnd);
+  double accum = ( requestEnd.tv_sec - requestStart.tv_sec ) + ( requestEnd.tv_nsec - requestStart.tv_nsec ) / BILLION;
+  printf( "\nTime Taken in Predictor:\n%lf seconds", accum );
+
  }//file rows 
 
   return 0;
