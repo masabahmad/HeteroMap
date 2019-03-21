@@ -13,4 +13,7 @@ You can add a benchmark to multiple_benchmark_input.csv with its input variables
 
 One can also use just one benchmark-input combination in file benchmark_input.csv using one row as an argument.
 
+To recreate the predicted inter- and intra-accelerator choices in the paper, just use the variables from 
+multiple_benchmark_input.csv to create the required benchmark-input combinations.
+
 **Notes**

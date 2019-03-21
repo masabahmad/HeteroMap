@@ -36,6 +36,7 @@ char affinity_type[10];
 #define max_global_threads 1048576
 #define max_local_threads 1024
 
+
 int main(int argc, char** argv)
 {
 
@@ -80,8 +81,8 @@ int main(int argc, char** argv)
   float omp_nowait = 0;
   float pragma_simd = 0;
   float omp_schedule_static = 0;
-  float omp_schedule_dynamic = 0;
   float omp_schedule_guided = 0;
+  float omp_schedule_dynamic = 0;
   float omp_schedule_auto = 0;
   float omp_schedule_chunk_size = 0;
   float omp_nested = 0;
@@ -100,12 +101,24 @@ int main(int argc, char** argv)
   //char c;
   int lines_to_check = 0;
   char name[256] = {' '};
+  char init[1024] = {' '};
   file0 = fopen(filename,"r");
   if (!file0) {
      printf ("Error:  Unable to open input file '%s'\n",filename);
      return 1;
   }
-  
+
+  //Read First line
+  int f1 = fscanf(file0, "%s", init);
+  if(f1 != 1 && f1 != EOF)
+  {
+  }
+  printf("\n FILE FORMAT: \n");
+  for(int i=0;i<300;i++)
+  {
+    printf("%c", init[i]);
+  }
+  printf("\n");
   //Input csv file read here
   //for(c=getc(file0); c!=EOF; c=getc(file0))
   //{
@@ -119,7 +132,7 @@ int main(int argc, char** argv)
         {
           name[j] = ' ';
         }
-        int f1 = fscanf(file0, "%[^,],%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+        int f2 = fscanf(file0, "%[^,],%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
                              name,
                              &vertex_division, &pareto, &pareto_division, &push_pop, &reduction, 
                              &floating_point, 
@@ -130,11 +143,11 @@ int main(int argc, char** argv)
                              &accelerator,
                              &cores, &multithreading, &kmp_blocktime, &kmp_place_threads1, &kmp_place_threads2, &kmp_place_threads3, &kmp_affinity,
                              &omp_nowait, &pragma_simd,
-                             &omp_schedule_static, &omp_schedule_dynamic, &omp_schedule_guided, &omp_schedule_auto, &omp_schedule_chunk_size,
+                             &omp_schedule_static, &omp_schedule_guided, &omp_schedule_dynamic, &omp_schedule_auto, &omp_schedule_chunk_size,
                              &omp_nested, &omp_max_active_levels, &gomp_spincount,
                              &global_threads, &local_threads);
  
-        if(f1 != 38 && f1 != EOF)
+        if(f2 != 38 && f2 != EOF)
         {
           //printf("\nError: Read %d values, expected 38. Parsing failed.",f1);
           //exit (EXIT_FAILURE);
@@ -145,11 +158,29 @@ int main(int argc, char** argv)
     line_counter++; lines_to_check = rows; lines_to_check++; 
   //}
 
-  printf("\n \n");
   for(int i=0;i<30;i++)
   {
     printf("%c", name[i]);
   }
+  printf("\n ");
+  for(int i=10;i<300;i++)
+  {
+    printf("%c", init[i]);
+  }
+  //Print with example M choices
+  printf("\n %.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f",
+          vertex_division, pareto, pareto_division, push_pop, reduction,
+          floating_point,
+          data_driven, indirect,
+          read_only, read_write_shared, local_comp,
+          contention, barriers,
+          vertices, edges, max_edges, diameter,
+          accelerator,
+          cores, multithreading, kmp_blocktime, kmp_place_threads1, kmp_place_threads2, kmp_place_threads3, kmp_affinity,
+          omp_nowait, pragma_simd,
+          omp_schedule_static, omp_schedule_guided, omp_schedule_dynamic, omp_schedule_auto, omp_schedule_chunk_size,
+          omp_nested, omp_max_active_levels, gomp_spincount,
+          global_threads, local_threads);
   printf("\n B and I Variables Read from File, Predicting......\n");
 
   //Decision Tree
@@ -477,7 +508,7 @@ int main(int argc, char** argv)
 
   clock_gettime(CLOCK_REALTIME, &requestEnd);
   double accum = ( requestEnd.tv_sec - requestStart.tv_sec ) + ( requestEnd.tv_nsec - requestStart.tv_nsec ) / BILLION;
-  printf( "\nTime Taken in Predictor:\n%lf seconds", accum );
+  printf( "\nTime Taken in Predictor:\n%lf seconds \n \n", accum );
 
  }//file rows 
 
