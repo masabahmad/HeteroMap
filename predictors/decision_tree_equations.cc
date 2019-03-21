@@ -154,10 +154,10 @@ int main(int argc, char** argv)
    clock_gettime(CLOCK_REALTIME, &requestStart);
 
   float deg = edges/vertices;
+  if(deg < 0)
+    deg = deg*-1;
   if(deg>1.0)
     deg = 1.0;
-  if(deg<0)
-    deg = deg*-1;
 
   if(vertex_division>=0.5)
   {
@@ -201,8 +201,8 @@ int main(int argc, char** argv)
         else
         {
           if(local_comp>=0.5)
-          {
-            if(deg>=0.5)
+          {  accelerator = 0;
+            /*if(deg>=0.5)
             {
               if(diameter>=0.5)
               {
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
             else
             {
               accelerator = 0;
-            }
+            }*/
           }
           else
           {
@@ -226,34 +226,47 @@ int main(int argc, char** argv)
       }
     }
   }
+
+
   else
   {
-    if(push_pop>=0.5)
+    if(local_comp >=0.5)
     {
-      if(deg>=0.5)
-      {
-        accelerator = 0;
-      }
-      else
-      {
-        accelerator = 1;
-      }
+      accelerator = 0;
     }
     else
     {
-      if(reduction>=0.5)
+      if(push_pop>=0.5)
       {
-        if(floating_point>=0.5)
+        if(deg>=0.5)
         {
-          if(vertices>=0.5 || edges>=0.5)
+          accelerator = 0;
+        }
+        else
+        {
+          accelerator = 1;
+        }
+      }
+      else
+      {
+        if(reduction>=0.5)
+        {
+          if(floating_point>=0.5)
           {
-            if(local_comp>=0.5)
+            if(vertices>=0.5 || edges>=0.5)
             {
-              accelerator = 0;
+              if(local_comp>=0.5)
+              {
+                accelerator = 0;
+              }
+              else
+              {
+                accelerator = 1;
+              }
             }
             else
             {
-              accelerator = 1;
+              accelerator = 0;
             }
           }
           else
@@ -263,22 +276,21 @@ int main(int argc, char** argv)
         }
         else
         {
-          accelerator = 0;
-        }
-      }
-      else
-      {
-        if(vertices>=0.5 || edges>=0.5)
-        {
-          accelerator = 0;
-        }
-        else
-        {
-          accelerator = 1;
+          if(vertices>=0.5 || edges>=0.5)
+          {
+            accelerator = 0;
+          }
+          else
+          {
+            accelerator = 1;
+          }
         }
       }
     }
   }
+
+
+
   if(accelerator==0.0)
    printf("\n Accelerator Decided as: Reuse-Latency-Multicore\n");
   if(accelerator==1.0)
@@ -363,8 +375,40 @@ int main(int argc, char** argv)
       pragma_simd = max_simd;
     int pragma_simdint = pragma_simd;
     printf("\n SIMD: %d",pragma_simdint);
-     
+
+   int static1 = 0;
+   int dynamic1 = 0;
+   int guided1 = 0;
+   int auto1 = 0;
+
+   omp_schedule_static = (vertex_division + data_driven + read_only + contention)/4;
+   omp_schedule_dynamic = (push_pop + reduction + indirect + read_write_shared)/4;
+   omp_schedule_guided = (pareto + pareto_division + read_write_shared + diameter)/4;
+   omp_schedule_auto = (vertex_division + reduction + data_driven + barriers)/4;
+   
+   if(omp_schedule_static >= omp_schedule_dynamic)
+     if(omp_schedule_static >= omp_schedule_guided)
+       if(omp_schedule_static >= omp_schedule_auto)
+         static1 = 1;
+   if(omp_schedule_dynamic > omp_schedule_static)
+     if(omp_schedule_dynamic >= omp_schedule_guided)
+       if(omp_schedule_dynamic >= omp_schedule_auto)
+         dynamic1 = 1;
+   if(omp_schedule_guided > omp_schedule_static)
+     if(omp_schedule_guided > omp_schedule_dynamic)
+       if(omp_schedule_guided >= omp_schedule_auto)
+         guided1 = 1;
+   if(omp_schedule_auto > omp_schedule_static)
+     if(omp_schedule_auto > omp_schedule_dynamic)
+       if(omp_schedule_auto > omp_schedule_guided)
+         auto1 = 1;
+   printf("\n OMP_SCHEDULE_STATIC: %f %d",omp_schedule_static, static1);
+   printf("\n OMP_SCHEDULE_DYNAMIC: %f %d",omp_schedule_dynamic, dynamic1);
+   printf("\n OMP_SCHEDULE_GUIDED: %f %d",omp_schedule_guided, guided1);
+   printf("\n OMP_SCHEDULE_AUTO: %f %d",omp_schedule_auto, auto1);
+ 
   }
+
   else
   {
     global_threads = (vertices*max_global_threads) + GPUMIN;
