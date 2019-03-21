@@ -23,6 +23,12 @@
 #define max_thread_placement max_cores
 char affinity_type[10];
 #define max_simd 16
+#define MIN_OMP_CHUNK_SIZE 8
+#define MAX_CHUNK_SIZE 128 //in powers of 2
+#define MAX_NESTING 5
+#define MIN_NESTING 0
+#define MAX_SPINS 100
+#define MIN_SPINS 0
 
 //GPU Specification Defines
 #define GPUMIN 32
@@ -376,6 +382,8 @@ int main(int argc, char** argv)
     int pragma_simdint = pragma_simd;
     printf("\n SIMD: %d",pragma_simdint);
 
+
+   //OMP scheduling, decides which scheduling to use for a benchmark-input combination
    int static1 = 0;
    int dynamic1 = 0;
    int guided1 = 0;
@@ -406,9 +414,53 @@ int main(int argc, char** argv)
    printf("\n OMP_SCHEDULE_DYNAMIC: %f %d",omp_schedule_dynamic, dynamic1);
    printf("\n OMP_SCHEDULE_GUIDED: %f %d",omp_schedule_guided, guided1);
    printf("\n OMP_SCHEDULE_AUTO: %f %d",omp_schedule_auto, auto1);
- 
+
+   //chunk size if required
+   omp_schedule_chunk_size = ((pareto + pareto_division + reduction + data_driven + read_only)/5)*MAX_CHUNK_SIZE + MIN_OMP_CHUNK_SIZE; 
+   int omp_schedule_chunk_sizeint = omp_schedule_chunk_size;
+   if(omp_schedule_chunk_sizeint > 2 && omp_schedule_chunk_sizeint < 4)
+     omp_schedule_chunk_sizeint = 4;
+   if(omp_schedule_chunk_sizeint > 4 && omp_schedule_chunk_sizeint < 8)
+     omp_schedule_chunk_sizeint = 8;
+   if(omp_schedule_chunk_sizeint > 8 && omp_schedule_chunk_sizeint < 16)
+     omp_schedule_chunk_sizeint = 16;
+   if(omp_schedule_chunk_sizeint > 16 && omp_schedule_chunk_sizeint < 32)
+     omp_schedule_chunk_sizeint = 32;
+   if(omp_schedule_chunk_sizeint > 32 && omp_schedule_chunk_sizeint < 64)
+     omp_schedule_chunk_sizeint = 64;
+   if(omp_schedule_chunk_sizeint > 64 && omp_schedule_chunk_sizeint < 128)
+     omp_schedule_chunk_sizeint = 128;
+   if(omp_schedule_chunk_sizeint > 128 && omp_schedule_chunk_sizeint < 256)
+     omp_schedule_chunk_sizeint = 256;
+   if(omp_schedule_chunk_sizeint > MAX_CHUNK_SIZE)
+     omp_schedule_chunk_sizeint = MAX_CHUNK_SIZE;
+   printf("\n OMP_SCHEDULE_CHUNK_SIZE: %d", omp_schedule_chunk_sizeint);
+   
+   //Only use Nested loops in more parallel benchmarks 
+   omp_nested = (vertex_division + data_driven + read_only + barriers)/4;
+   int omp_nestedint = 0;
+   if(omp_nested >= 0.5)
+     omp_nestedint = 1;
+   else
+     omp_nestedint = 0;
+   printf("\n OMP_NESTED: %d",omp_nestedint);
+
+   //If nesting is used in OpenMP, exploit inner parallelism
+   omp_max_active_levels = (1.0-(push_pop + reduction + read_write_shared + contention)/4)*MAX_NESTING + MIN_NESTING;
+   int omp_max_active_levelsint = omp_max_active_levels;
+   if(omp_max_active_levelsint > MAX_NESTING)
+     omp_max_active_levelsint = MAX_NESTING;
+   printf("\n OMP_MAX_ACTIVE_LEVELS: %d", omp_max_active_levelsint);
+
+   //Waiting for spins on atomics and context switches
+   gomp_spincount = ((contention + barriers)/2)*MAX_SPINS + MIN_SPINS;
+   int gomp_spincountint = gomp_spincount;
+   if(gomp_spincountint > MAX_SPINS)
+     gomp_spincountint = MAX_SPINS;
+   printf("\n GOMP_SPINCOUNT: %d", gomp_spincountint);
   }
 
+  //GPU INTRA CHOICES
   else
   {
     global_threads = (vertices*max_global_threads) + GPUMIN;
