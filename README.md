@@ -20,7 +20,6 @@ Requirements
 
 1. Linux (Tested on Ubuntu 14.04)
 2. g++ 4.6 (Tested with g++ 4.7)
-3. The ```pthread``` Library
 
 Features
 ========
