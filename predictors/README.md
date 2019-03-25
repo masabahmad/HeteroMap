@@ -13,6 +13,8 @@ You can add a benchmark to multiple_benchmark_input.csv with its input variables
 
 One can also use just one benchmark-input combination in file benchmark_input.csv using one row as an argument.
 
+To add your own benchmark-input combination, simply decompose the target graph benchmark and input into its respective B and I variables, and then write these variables into a .csv file. Then the .csv file can be run using the ```decision_tree_model``` executable.
+
 To recreate the predicted inter- and intra-accelerator choices in the paper, just use the variables from 
 multiple_benchmark_input.csv to create the required benchmark-input combinations.
 
