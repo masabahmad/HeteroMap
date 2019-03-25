@@ -30,7 +30,7 @@ Getting Started
 Checkout the Repo:
 ```git clone https://github.com/masabahmad/HeteroMap```
 
-To generate the executable for a predictor, run ```make``` inside the HeteroMap directory, then execute using the syntax specified by the individual README.md.
+To generate the executable for a predictor, run ```make``` inside the HeteroMap directory, then execute using the syntax specified by the individual README.md file in the predictors directory.
 
 Contact
 =======
