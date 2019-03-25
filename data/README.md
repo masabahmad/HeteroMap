@@ -11,6 +11,4 @@ NVidia GTX-1080
 Intel Xeon Phi 7120P (61 Cores)
 Intel Xeon E5-2650 v3 (40 Cores)
 
-You can run ```make``` to create executables for each program or use the following commands below
-
 **Notes**
