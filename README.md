@@ -4,8 +4,8 @@ HeteroMap v0.9 : A Runtime Performance Predictor for Efficient Processing of Gra
 
 [![build status](https://travis-ci.org/masabahmad/HeteroMap.svg?branch=master)](https://travis-ci.org/masabahmad/HeteroMap)
 
-This is a pre-release repository containing HeteroMap's predictors and data.
-These predictors can run on real multicore machines as well as multicore simulators.
+This is a pre-release repository containing HeteroMap's lightweight performance predictor, with performance and energy data acquired from various machine setups.
+The proposed predictor utilizes an ontology of graph benchmarks and inputs to decide the optimal machine/accelerator and the selected machine's internal architectural choices.
 
 If you use these benchmarks, please cite:
 
