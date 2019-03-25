@@ -9,14 +9,14 @@
 #define BILLION 1E9
 
 
-//Multicore Specification Defines
-#define CORESMIN 2
+//Multicore Specification Defines (Xeon Phi 7120P)
+#define CORESMIN 4 //Specified as 4 as the Phi runs at a 4x less frequency than commodity multicores
 #define MTMIN 1
 #define BLOCKTIMEMIN 1
 #define OFFSETMIN 1
 #define KMP_AFFINITY_MIN 0
 #define SIMDMIN 1
-
+//Xeon Phi Max M Parameters
 #define max_cores 61
 #define max_multithreading 4
 #define max_blocktime 1000
