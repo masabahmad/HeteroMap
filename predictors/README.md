@@ -16,6 +16,6 @@ To add your own benchmark-input combination, simply decompose the target graph b
 An example is provided with with the KCore implementation from Julienne-Ligra (https://github.com/jshun/ligra/blob/master/apps/bucketing/KCore.C) in this regard. This can be run as
    ```./decision_tree_model 1 KCore-JulienneLigra.csv```
 
-To recreate the predicted inter- and intra-accelerator choices in the paper, just use benchmark_input_all_combinations.csv to create the predicted results. Command: ```./decision_tree_model 80 benchmark_input_all_combinations.csv```
+To recreate the predicted inter- and intra-accelerator choices in the paper, just use benchmark_input_all_combinations.csv to create the predicted results. Command: ```./decision_tree_model 81 benchmark_input_all_combinations.csv```
 
 **Notes**
