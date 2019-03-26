@@ -12,9 +12,10 @@ The .csv file contains the benchmark and input model for a particular benchmark-
 One can also use just one benchmark-input combination in file benchmark_input.csv using one row as an argument.
 
 To add your own benchmark-input combination, simply decompose the target graph benchmark and input into its respective B and I variables using the methodology provided in the HeteroMap paper, and then write these variables into a .csv file. Then the .csv file can be run using the ```decision_tree_model``` executable. 
-An example is provided with with the KCore implementation from Julienne-Ligra in this regard https://github.com/jshun/ligra/blob/master/apps/bucketing/KCore.C.
 
-To recreate the predicted inter- and intra-accelerator choices in the paper, just use the variables from 
-multiple_benchmark_input.csv to create the required benchmark-input combinations.
+An example is provided with with the KCore implementation from Julienne-Ligra (https://github.com/jshun/ligra/blob/master/apps/bucketing/KCore.C) in this regard. This can be run as
+   ```./decision_tree_model 1 KCore-JulienneLigra.csv```
+
+To recreate the predicted inter- and intra-accelerator choices in the paper, just use benchmark_input_all_combinations.csv to create the predicted results. Command: ```./decision_tree_model 80 benchmark_input_all_combinations.csv```
 
 **Notes**
