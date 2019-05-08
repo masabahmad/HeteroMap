@@ -1,5 +1,5 @@
 
-TRGS = decision_tree_equations
+TRGS = decision_tree_model
 
 LIBS += -lpthread -lrt
 
@@ -12,7 +12,7 @@ CXXFLAGS += -Wall -Werror
 
 all: $(TRGS)
 
-decision_tree_equations: decision_tree_equations.cc
+decision_tree_model: decision_tree_model.cc
 ## ./read_vars example.csv
 
 clean:
